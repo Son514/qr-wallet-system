@@ -56,6 +56,34 @@ func getCashinQR(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+func cashoutPayout(c *gin.Context) {
+	var req models.CashoutRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res, err := client.CreateCashout(req)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func getPayout(c *gin.Context) {
+	id := c.Param("id")
+
+	res, err := client.GetPayout(id)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
 func main() {
 	godotenv.Load()
 
@@ -77,5 +105,7 @@ func main() {
 	router.POST("/v1/cash-in/qr", cashinQR)
 	router.POST("/v1/cash-in/qr/:id/simulate", simulateCashinQR)
 	router.GET("/v1/cash-in/qr/:id", getCashinQR)
+	router.POST("/v1/cash-out/payout", cashoutPayout)
+	router.GET("/v1/cash-out/payout/:id", getPayout)
 	router.Run()
 }

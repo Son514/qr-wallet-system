@@ -120,3 +120,93 @@ function startPolling() {
     }
   }, 2000);
 }
+
+const CASHOUT_URL = "http://localhost:8080/v1/cash-out/payout";
+
+const cashoutForm = document.getElementById("cashout-form");
+const cashoutReferenceIdInput = document.getElementById("cashout_reference_id");
+const cashoutAmountInput = document.getElementById("cashout_amount");
+const cashoutChannelSelect = document.getElementById("cashout_channel");
+const cashoutAccountHolderInput = document.getElementById("cashout_account_holder_name");
+const cashoutAccountNumberInput = document.getElementById("cashout_account_number");
+const cashoutStatusEl = document.getElementById("cashout-status");
+
+let lastPayoutId = null;
+let cashoutPollTimer = null;
+
+cashoutReferenceIdInput.value = "cashout-" + Date.now();
+
+cashoutForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (cashoutPollTimer) {
+    clearInterval(cashoutPollTimer);
+    cashoutPollTimer = null;
+  }
+
+  cashoutStatusEl.textContent = "Creating payout...";
+
+  try {
+    const response = await fetch(CASHOUT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        reference_id: cashoutReferenceIdInput.value,
+        amount: Number(cashoutAmountInput.value),
+        channel: cashoutChannelSelect.value,
+        account_holder_name: cashoutAccountHolderInput.value,
+        account_number: cashoutAccountNumberInput.value,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      cashoutStatusEl.textContent = data.error || "Request failed";
+      return;
+    }
+
+    lastPayoutId = data.payout_id;
+    cashoutStatusEl.textContent = data.payout_id + " (" + data.status + ")";
+    startPayoutPolling();
+  } catch (err) {
+    cashoutStatusEl.textContent = err.message;
+  }
+});
+
+function startPayoutPolling() {
+  let attempts = 0;
+  const maxAttempts = 15;
+
+  cashoutPollTimer = setInterval(async () => {
+    attempts++;
+
+    try {
+      const response = await fetch(CASHOUT_URL + "/" + lastPayoutId);
+      const data = await response.json();
+
+      if (!response.ok) {
+        cashoutStatusEl.textContent = data.error || "Status check failed";
+        clearInterval(cashoutPollTimer);
+        cashoutPollTimer = null;
+        return;
+      }
+
+      cashoutStatusEl.textContent =
+        data.payout_id + " (" + data.status + ")" + (data.failure_code ? " - " + data.failure_code : "");
+
+      if (["SUCCEEDED", "FAILED", "REVERSED", "CANCELLED", "REJECTED"].includes(data.status)) {
+        clearInterval(cashoutPollTimer);
+        cashoutPollTimer = null;
+      } else if (attempts >= maxAttempts) {
+        clearInterval(cashoutPollTimer);
+        cashoutPollTimer = null;
+        cashoutStatusEl.textContent += " (timed out)";
+      }
+    } catch (err) {
+      cashoutStatusEl.textContent = err.message;
+      clearInterval(cashoutPollTimer);
+      cashoutPollTimer = null;
+    }
+  }, 2000);
+}

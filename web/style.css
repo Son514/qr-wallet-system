@@ -28,6 +28,17 @@ h1 {
   font-size: 1.4rem;
 }
 
+h2 {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+}
+
+hr {
+  margin: 32px 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
 form {
   display: flex;
   flex-direction: column;
@@ -48,6 +59,15 @@ input {
   font-size: 1rem;
 }
 
+select {
+  margin-bottom: 16px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+}
+
 button {
   padding: 12px;
   border: none;
@@ -63,7 +83,8 @@ button:hover {
   background: #1d4ed8;
 }
 
-#status {
+#status,
+#cashout-status {
   margin: 16px 0;
   font-size: 0.85rem;
   color: #555;

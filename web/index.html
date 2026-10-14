@@ -24,6 +24,51 @@
 
     <p id="status"></p>
     <canvas id="qr"></canvas>
+
+    <hr />
+
+    <h2>Cash-out (InstaPay)</h2>
+
+    <form id="cashout-form">
+      <label for="cashout_reference_id">Reference ID</label>
+      <input id="cashout_reference_id" name="reference_id" type="text" required />
+
+      <label for="cashout_amount">Amount (PHP)</label>
+      <input id="cashout_amount" name="amount" type="number" min="1" max="50000" step="0.01" required />
+
+      <label for="cashout_channel">Channel</label>
+      <select id="cashout_channel" name="channel" required>
+        <optgroup label="Bank">
+          <option value="PH_BDO">BDO</option>
+          <option value="PH_BPI">BPI</option>
+          <option value="PH_MBT">Metrobank</option>
+          <option value="PH_UBP">UnionBank</option>
+          <option value="PH_LBP">LandBank</option>
+          <option value="PH_SEC">Security Bank</option>
+          <option value="PH_RCBC">RCBC</option>
+          <option value="PH_PNB">PNB</option>
+          <option value="PH_CBC">China Bank</option>
+          <option value="PH_DBP">DBP</option>
+        </optgroup>
+        <optgroup label="E-wallet">
+          <option value="PH_GCASH">GCash</option>
+          <option value="PH_MAYA">Maya</option>
+          <option value="PH_GRABPAY">GrabPay</option>
+          <option value="PH_SHOPEE">ShopeePay</option>
+          <option value="PH_COINS">Coins.ph</option>
+        </optgroup>
+      </select>
+
+      <label for="cashout_account_holder_name">Account holder name</label>
+      <input id="cashout_account_holder_name" name="account_holder_name" type="text" required />
+
+      <label for="cashout_account_number">Account number</label>
+      <input id="cashout_account_number" name="account_number" type="text" required />
+
+      <button type="submit">Cash out</button>
+    </form>
+
+    <p id="cashout-status"></p>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
